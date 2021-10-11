@@ -1,0 +1,28 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2021-10-11T14:06:44+09:00",
+  "id": "glass_integration_with_gws",
+  "duration": 0,
+  "title": "Google Workspace と連携したアプリの開発",
+  "summary": "Google Workspace と連携したアプリの開発",
+  "source": "glass_integration_with_gws.md",
+  "theme": "",
+  "status": [
+    "[draft]"
+  ],
+  "category": [
+    "android",
+    "glass"
+  ],
+  "tags": [
+    "android",
+    "googleglass",
+    "gws",
+    "workspace"
+  ],
+  "feedback": "TBE",
+  "url": "glass_integration_with_gws"
+}

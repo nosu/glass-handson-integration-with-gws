@@ -1,0 +1,416 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Google Workspace と連携したアプリの開発</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="glass_integration_with_gws"
+                  title="Google Workspace と連携したアプリの開発"
+                  environment="web"
+                  feedback-link="TBE">
+    
+      <google-codelab-step label="概要" duration="0">
+        <h2 is-upgraded>はじめに</h2>
+<p>このコースでは、Google Glass Enterprise Edition 2 向けに、Google Workspace (以下 <code>GWS</code>) と連携するアプリケーションの開発を行います。 Glass 用のアプリケーションは、オフラインで完結するものを開発することも可能ですが、GWS に含まれる Google Drive / Google Calendar / Google Slides 等の様々なクラウドサービスと連携することで、より便利な機能を実現することができます。</p>
+<p>今回は、Google Slides と連携して、PC 等で作成したスライド（プレゼンテーション）を、Glass の画面に表示し、スワイプ操作でページめくりを行うことができるアプリケーションを開発してみます。</p>
+<p class="image-container"><img alt="プロジェクト選択" src="img/2303985c93aac74d.gif"></p>
+<h2 is-upgraded>必要な事前知識</h2>
+<p>このコースでは、以下の事前知識を前提としています。</p>
+<ul>
+<li>Android Studio の基本操作</li>
+<li>Google Glass Enterprise Edition 2 (またはエミュレータ)の操作方法</li>
+<li>Android アプリケーション開発の基礎</li>
+</ul>
+<h2 is-upgraded>このコースで学ぶこと</h2>
+<ul>
+<li>Google API Client の使い方</li>
+<li>Fragment や Layout の作成方法</li>
+<li>Android における非同期処理の実装方法</li>
+</ul>
+<h2 is-upgraded>このコースでやること</h2>
+<p><code>CardSample</code> プロジェクトをベースに、Google Slides と連携して、PC 等で作成したスライド（プレゼンテーション）を、Glass の画面に表示し、スワイプ操作でページめくりを行うことができるアプリケーションを開発してみます。</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="ハンズオンの概要" duration="0">
+        <p>前半では、Slides API をはじめとするクラウド側の準備作業を行います。 後半では、 <code>CardSample</code> をベースとして、スライドを表示するための実装を行います。</p>
+<h2 is-upgraded>実装するアプリのイメージ</h2>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Google Cloud / GWS 側の準備" duration="0">
+        <p>まずは、アプリから Slides API を呼び出すことができるように、クラウドサービス側の準備を行います。</p>
+<ul>
+<li>Google Cloud プロジェクトの作成・選択</li>
+<li>Slides API の有効化</li>
+<li>サービスアカウントの作成と権限の付与</li>
+<li>サービスアカウントの鍵を作成・ダウンロード</li>
+<li>テスト用スライドの準備</li>
+</ul>
+<h2 is-upgraded>Google Cloud プロジェクトの作成・選択</h2>
+<p>今日のハンズオン用に Google Cloud のプロジェクトを作成します。</p>
+<ul>
+<li>Cloud Console (<a href="https://console.cloud.google.com" target="_blank">https://console.cloud.google.com</a>) にアクセスする</li>
+<li>ヘッダにあるプロジェクト名をクリックし、「新しいプロジェクト」を選択 <img alt="ヘッダ" src="img/5266409ec31c330e.png"></li>
+<li>適当なプロジェクト名を入力し、「作成」をクリック <img alt="プロジェクト選択" src="img/cc2288e7eb57edf3.png"></li>
+<li>作成完了の通知が表示されたら、通知ポップアップから作成したプロジェクトに切り替える</li>
+</ul>
+<aside class="special"><p> または、作成済みのプロジェクトをそのまま利用いただいても構いません。その場合は、ヘッダにあるプロジェクト名をクリックしてから、使用したいプロジェクトを選択してください。</p>
+</aside>
+<h2 is-upgraded>Slides API の有効化</h2>
+<p>Google Cloud では、意図しない API の利用を防ぐために、デフォルトではすべての API が無効化されています。 今回開発するアプリでは Slides API を利用したいので、Slides API を明示的に有効化します。</p>
+<ul>
+<li>Console 画面上部にある検索窓に、&#34;slides api&#34; などと入力し、表示された候補から「Google Slides API」を選択する</li>
+<li>「有効にする」をクリックしてしばらく待つ</li>
+</ul>
+<h2 is-upgraded>サービスアカウントの作成と権限の付与</h2>
+<ul>
+<li>Console の左メニューから「IAM と管理」→「サービスアカウント」をクリック</li>
+<li>「＋サービスアカウントを作成」をクリック</li>
+</ul>
+<p>サービスアカウントの鍵を作成・ダウンロード</p>
+<h2 is-upgraded>テスト用スライドの準備</h2>
+<ul>
+<li><a href="https://docs.google.com/presentation/u/0/?tgif=d" target="_blank">Google Slides</a> にアクセスし、新規スライドを作成する Positive: ブラウザから <a href="https://slides.new/" target="_blank">slides.new</a> にアクセスすることでも新しいスライドを作成できます</li>
+<li>作成したスライドに新しいページを何枚か追加し、適当な内容を記載する</li>
+</ul>
+<h2 is-upgraded>サービスアカウントにテスト用スライドへの閲覧権限を付与</h2>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="アプリ実装(1)" duration="0">
+        <h2 is-upgraded>ベースとなるサンプルアプリの Clone</h2>
+<pre><code language="language-bash" class="language-bash">git clone 
+</code></pre>
+<h2 is-upgraded>Google API Client ライブラリの追加</h2>
+<p>Android Studio のビルドツールである Gradle の設定ファイル（build.gradle）に、Slides API 用ライブラリと認証用ライブラリを依存関係として追記する</p>
+<ul>
+<li>CardSample/app/build.gradle に以下の2行を追記する</li>
+</ul>
+<pre><code language="language-gradle" class="language-gradle">dependencies {
+    ...
+    implementation &#39;com.google.apis:google-api-services-slides:v1-rev20210820-1.32.1&#39;
+    implementation &#39;com.google.auth:google-auth-library-oauth2-http:1.2.0&#39;
+}
+</code></pre>
+<ul>
+<li>Android Studio の右ペイン上部に以下のような警告が出てくるので、&#34;Sync Now&#34; をクリックして、変更を反映する <img alt="Gradle の警告" src="img/f1e40744cd679220.png"></li>
+</ul>
+<p>Google API Client ライブラリについて</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="アプリ実装(2)" duration="0">
+        <h2 is-upgraded>スライド画像表示用の Fragment の作成</h2>
+<p>スライドの各ページを全画面で表示するための Fragment を作成し、Layout を設定する。</p>
+<h3 is-upgraded>Fragment の新規追加</h3>
+<ul>
+<li>左ペインの Project Tree から、<code>CardSample/app/src/main/java/com.example.android.glass.cardsample/fragments</code> を右クリックし、New → Fragment → Fragment (Blank) をクリックする <img alt="Fragment の新規作成" src="img/d63a829c2a75b391.png"></li>
+<li>以下のとおり入力して Finish をクリック <ul>
+<li>Fragment Name: ImageLayoutFragment</li>
+<li>Fragment Layout Name: image_layout</li>
+<li>Source Language: Java</li>
+</ul>
+</li>
+</ul>
+<h3 is-upgraded>Layout の編集</h3>
+<p>Fragment のレイアウトに ImageView を配置する。</p>
+<ul>
+<li>先ほどの ImageLayoutFragment 作成に伴って作成された <code>CardSample/app/src/main/res/res/layout/image_layout.xml</code> をダブルクリックして開く</li>
+<li>右ペイン上部のメニューから <code>Design</code> → <code>Code</code> に切り替える</li>
+<li>XML から <code>TextView</code> のタグを削除し、代わりに以下のような <code>ImageView</code> を追加する</li>
+</ul>
+<pre><code language="language-XML" class="language-XML">&lt;FrameLayout ...&gt;
+    ...
+
+    &lt;!-- TextView は削除 --&gt;
+    &lt;!-- &lt;TextView
+        android:layout_width=&#34;match_parent&#34;
+        android:layout_height=&#34;match_parent&#34;
+        android:text=&#34;@string/hello_blank_fragment&#34; /&gt; --&gt;
+
+    &lt;!-- ImageView を追加 --&gt;
+    &lt;ImageView
+        android:id=&#34;@+id/slideImageView&#34;
+        android:layout_width=&#34;640dp&#34;
+        android:layout_height=&#34;360dp&#34; /&gt;
+&lt;/FrameLayout&gt;
+</code></pre>
+<p>（補足）Activity / Fragment / View のイメージ</p>
+<h2 is-upgraded>Slides API からデータを取得する非同期処理の実装</h2>
+<pre><code language="language-Java" class="language-Java">package com.example.android.glass.cardsample;
+
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
+import android.util.Log;
+
+import com.google.api.services.slides.v1.Slides;
+import com.google.api.services.slides.v1.model.*;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.services.slides.v1.model.Presentation;
+import com.google.auth.http.HttpCredentialsAdapter;
+import com.google.auth.oauth2.GoogleCredentials;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.security.GeneralSecurityException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class SlidesApiTask extends AsyncTask&lt;Void, Void, List&lt;Bitmap&gt;&gt; {
+    private Listener listener;
+    private GoogleCredentials credentials;
+    private String presentationId;
+    private final HttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+    private final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
+
+    public SlidesApiTask(String presentationId, GoogleCredentials credentials) throws GeneralSecurityException, IOException {
+        this.presentationId = presentationId;
+        this.credentials = credentials;
+    }
+
+    @Override
+    protected List&lt;Bitmap&gt; doInBackground(Void... args) {
+        List&lt;Bitmap&gt; thumbnails = new ArrayList&lt;Bitmap&gt;();
+        try {
+            List&lt;String&gt; thumbnailUrls = getThumbnailUrls();
+            for(int i = 0; i &lt; thumbnailUrls.size(); i++) {
+                Bitmap bitmap = getBitmapFromURL(thumbnailUrls.get(i));
+                thumbnails.add(bitmap);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return thumbnails;
+    }
+
+    @Override
+    protected void onPostExecute(List&lt;Bitmap&gt; result) {
+        if (listener != null) {
+            listener.onSuccess(result);
+        }
+    }
+
+    void setListener(Listener listener) {
+        this.listener = listener;
+    }
+
+    interface Listener {
+        void onSuccess(List&lt;Bitmap&gt; result);
+    }
+
+    public static Bitmap getBitmapFromURL(String src) {
+        try {
+            URL url = new URL(src);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setDoInput(true);
+            connection.connect();
+            InputStream input = connection.getInputStream();
+            Bitmap myBitmap = BitmapFactory.decodeStream(input);
+            return myBitmap;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private List&lt;String&gt; getThumbnailUrls() throws IOException {
+        List&lt;String&gt; thumbnailUrls = new ArrayList&lt;String&gt;();
+
+        HttpRequestInitializer requestInitializer = new HttpCredentialsAdapter(credentials);
+        Slides slides = new Slides.Builder(HTTP_TRANSPORT, JSON_FACTORY, requestInitializer)
+                .setApplicationName(&#34;glass-handson&#34;)
+                .build();
+        Presentation presentation = slides.presentations().get(presentationId).execute();
+        List&lt;Page&gt; pages = presentation.getSlides();
+        for(int i = 0; i &lt; pages.size(); ++i){
+            Page page = pages.get(i);
+            Thumbnail thumbnail = slides.presentations().pages().getThumbnail(presentationId, page.getObjectId()).execute();
+            thumbnailUrls.add(thumbnail.getContentUrl());
+        }
+
+        Log.d(&#34;SlidesApiTask&#34;, &#34;got thumbnailUrls successfully&#34;);
+        Log.d(&#34;SlidesApiTask&#34;, thumbnailUrls.toString());
+
+        return thumbnailUrls;
+    }
+}
+
+</code></pre>
+<h2 is-upgraded>MainActivity の実装</h2>
+<pre><code language="language-Java" class="language-Java">/*
+ * Copyright 2019 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the &#34;License&#34;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &#34;AS IS&#34; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.example.android.glass.cardsample;
+
+import android.content.res.AssetManager;
+import android.graphics.Bitmap;
+import android.os.Bundle;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentStatePagerAdapter;
+import androidx.viewpager.widget.ViewPager;
+import com.example.android.glass.cardsample.fragments.BaseFragment;
+import com.example.android.glass.cardsample.fragments.ImageLayoutFragment;
+import com.example.glass.ui.GlassGestureDetector.Gesture;
+import com.google.android.material.tabs.TabLayout;
+import com.google.api.services.slides.v1.SlidesScopes;
+import com.google.auth.oauth2.GoogleCredentials;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.GeneralSecurityException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+/**
+ * Main activity of the application. It provides viewPager to move between fragments.
+ */
+public class MainActivity extends BaseActivity {
+    private List&lt;BaseFragment&gt; fragments = new ArrayList&lt;&gt;();
+    private ViewPager viewPager;
+    private SlidesApiTask slidesApiTask;
+
+    private final String PRESENTATION_ID = &#34;128nf3EGQfrQlrmeNfTDtgXJmAMNfZfh-o7hYLlQMKRY&#34;;
+    private final String SERVICE_ACCOUNT_FILENAME = &#34;glass-handson-bd7e889aa9f0.json&#34;;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setContentView(R.layout.loading_layout);
+
+        try {
+            GoogleCredentials credentials = loadServiceAccountCredential();
+            slidesApiTask = new SlidesApiTask(PRESENTATION_ID, credentials);
+            slidesApiTask.setListener(createSlidesApiTaskListener());
+            slidesApiTask.execute();
+        } catch (GeneralSecurityException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public boolean onGesture(Gesture gesture) {
+        switch (gesture) {
+            case TAP:
+                fragments.get(viewPager.getCurrentItem()).onSingleTapUp();
+                return true;
+            default:
+                return super.onGesture(gesture);
+        }
+    }
+
+    private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
+
+        ScreenSlidePagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            return fragments.get(position);
+        }
+
+        @Override
+        public int getCount() {
+            return fragments.size();
+        }
+    }
+
+
+    private SlidesApiTask.Listener createSlidesApiTaskListener() throws GeneralSecurityException, IOException {
+        return new SlidesApiTask.Listener() {
+            @Override
+            public void onSuccess(List&lt;Bitmap&gt; thumbnails) {
+                setContentView(R.layout.view_pager_layout);
+
+                final ScreenSlidePagerAdapter screenSlidePagerAdapter = new ScreenSlidePagerAdapter(
+                        getSupportFragmentManager());
+                viewPager = findViewById(R.id.viewPager);
+                viewPager.setAdapter(screenSlidePagerAdapter);
+
+                for(int i = 0; i &lt; thumbnails.size(); i++) {
+                    fragments.add(ImageLayoutFragment
+                            .newInstance(thumbnails.get(i)));
+                }
+
+                screenSlidePagerAdapter.notifyDataSetChanged();
+
+                final TabLayout tabLayout = findViewById(R.id.page_indicator);
+                tabLayout.setupWithViewPager(viewPager, true);
+            }
+        };
+    }
+
+    private GoogleCredentials loadServiceAccountCredential() throws IOException {
+        Collection&lt;String&gt; scopes = new ArrayList&lt;String&gt;();
+        scopes.add(SlidesScopes.PRESENTATIONS_READONLY);
+        AssetManager assetManager = getAssets();
+        InputStream inputStream = assetManager.open(SERVICE_ACCOUNT_FILENAME);
+        GoogleCredentials credentials = GoogleCredentials.fromStream(inputStream);
+        return credentials;
+    }
+}
+
+</code></pre>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>
