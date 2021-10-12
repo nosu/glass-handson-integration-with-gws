@@ -27,33 +27,40 @@
                   environment="web"
                   feedback-link="TBE">
     
-      <google-codelab-step label="概要" duration="0">
+      <google-codelab-step label="コースの概要" duration="0">
         <h2 is-upgraded>はじめに</h2>
 <p>このコースでは、Google Glass Enterprise Edition 2 向けに、Google Workspace (以下 <code>GWS</code>) と連携するアプリケーションの開発を行います。 Glass 用のアプリケーションは、オフラインで完結するものを開発することも可能ですが、GWS に含まれる Google Drive / Google Calendar / Google Slides 等の様々なクラウドサービスと連携することで、より便利な機能を実現することができます。</p>
 <p>今回は、Google Slides と連携して、PC 等で作成したスライド（プレゼンテーション）を、Glass の画面に表示し、スワイプ操作でページめくりを行うことができるアプリケーションを開発してみます。</p>
 <p class="image-container"><img alt="プロジェクト選択" src="img/2303985c93aac74d.gif"></p>
+<h2 is-upgraded>必要なもの</h2>
+<ul>
+<li>Google Glass Enterprise Edition 2</li>
+<li>以下がインストールされた PC <ul>
+<li>Android Studio</li>
+<li>git</li>
+<li>Android Emulator（Google Glass Enterprise Edition 2 がない場合）</li>
+</ul>
+</li>
+<li>Google Cloud アカウント</li>
+<li>Google Workspace アカウント</li>
+</ul>
 <h2 is-upgraded>必要な事前知識</h2>
 <p>このコースでは、以下の事前知識を前提としています。</p>
 <ul>
 <li>Android Studio の基本操作</li>
 <li>Google Glass Enterprise Edition 2 (またはエミュレータ)の操作方法</li>
 <li>Android アプリケーション開発の基礎</li>
+<li>Java の基本的な文法</li>
 </ul>
 <h2 is-upgraded>このコースで学ぶこと</h2>
 <ul>
-<li>Google API Client の使い方</li>
+<li>Google API Client ライブラリによる Google API の利用</li>
 <li>Fragment や Layout の作成方法</li>
 <li>Android における非同期処理の実装方法</li>
 </ul>
 <h2 is-upgraded>このコースでやること</h2>
 <p><code>CardSample</code> プロジェクトをベースに、Google Slides と連携して、PC 等で作成したスライド（プレゼンテーション）を、Glass の画面に表示し、スワイプ操作でページめくりを行うことができるアプリケーションを開発してみます。</p>
-
-
-      </google-codelab-step>
-    
-      <google-codelab-step label="ハンズオンの概要" duration="0">
-        <p>前半では、Slides API をはじめとするクラウド側の準備作業を行います。 後半では、 <code>CardSample</code> をベースとして、スライドを表示するための実装を行います。</p>
-<h2 is-upgraded>実装するアプリのイメージ</h2>
+<p>前半では、Slides API をはじめとするクラウド側の準備作業を行います。 後半では、 <code>CardSample</code> をベースとして、スライドを表示するための実装を行います。</p>
 
 
       </google-codelab-step>
@@ -71,11 +78,11 @@
 <p>今日のハンズオン用に Google Cloud のプロジェクトを作成します。</p>
 <ul>
 <li>Cloud Console (<a href="https://console.cloud.google.com" target="_blank">https://console.cloud.google.com</a>) にアクセスする</li>
-<li>ヘッダにあるプロジェクト名をクリックし、「新しいプロジェクト」を選択 <img alt="ヘッダ" src="img/5266409ec31c330e.png"></li>
+<li>ヘッダにあるプロジェクト名（ここでは <code>glass-handson</code>）をクリックし、表示されたダイアログから「新しいプロジェクト」を選択 <img alt="ヘッダ" src="img/5266409ec31c330e.png"></li>
 <li>適当なプロジェクト名を入力し、「作成」をクリック <img alt="プロジェクト選択" src="img/cc2288e7eb57edf3.png"></li>
 <li>作成完了の通知が表示されたら、通知ポップアップから作成したプロジェクトに切り替える</li>
 </ul>
-<aside class="special"><p> または、作成済みのプロジェクトをそのまま利用いただいても構いません。その場合は、ヘッダにあるプロジェクト名をクリックしてから、使用したいプロジェクトを選択してください。</p>
+<aside class="special"><p> プロジェクトを作成せず、作成済みのプロジェクトをそのまま利用いただいても構いません。その場合は、ヘッダにあるプロジェクト名をクリックしてから、使用したいプロジェクトを選択してください。</p>
 </aside>
 <h2 is-upgraded>Slides API の有効化</h2>
 <p>Google Cloud では、意図しない API の利用を防ぐために、デフォルトではすべての API が無効化されています。 今回開発するアプリでは Slides API を利用したいので、Slides API を明示的に有効化します。</p>
@@ -86,25 +93,66 @@
 <h2 is-upgraded>サービスアカウントの作成と権限の付与</h2>
 <ul>
 <li>Console の左メニューから「IAM と管理」→「サービスアカウント」をクリック</li>
-<li>「＋サービスアカウントを作成」をクリック</li>
+<li>「＋ サービスアカウントを作成」をクリック</li>
+<li>以下のとおり入力して、<code>完了</code> をクリック（あるいは違う名前でも構いません） <ul>
+<li>サービスアカウント名: <code>glass-slides-app</code></li>
+<li>サービスアカウントID: <code>glass-slides-app</code></li>
 </ul>
-<p>サービスアカウントの鍵を作成・ダウンロード</p>
-<h2 is-upgraded>テスト用スライドの準備</h2>
+</li>
+<li>サービスアカウント一覧画面に戻ったら、今作成したサービスアカウントのメールアドレス（<code>glass-slides-app@<ProjectID>.iam.gserviceaccount.com</code>）をコピーしてメモしておく</li>
+</ul>
+<h2 is-upgraded>サービスアカウントの鍵を作成・ダウンロード</h2>
+<p>次に、作成したサービスアカウントで認証を行うためのキーファイルをダウンロードします。</p>
 <ul>
-<li><a href="https://docs.google.com/presentation/u/0/?tgif=d" target="_blank">Google Slides</a> にアクセスし、新規スライドを作成する Positive: ブラウザから <a href="https://slides.new/" target="_blank">slides.new</a> にアクセスすることでも新しいスライドを作成できます</li>
+<li>サービスアカウント一覧画面で、先ほど作成した <code>glass-slides-app@<ProjectID>.iam.gserviceaccount.com</code> の列の右側にある <code>操作</code> という列の <code>...</code> アイコンをクリック</li>
+<li><code>鍵を管理</code> をクリック</li>
+<li><code>鍵を追加</code> をクリックし、<code>新しい鍵を作成</code> をクリック</li>
+<li><code>キーのタイプ</code> として <code>JSON</code> が選択されていることを確認し、<code>作成</code> をクリック</li>
+<li>鍵が作成されて、自動的に鍵の JSON ファイルがダウンロードされる</li>
+</ul>
+<h2 is-upgraded>テスト用スライドの準備</h2>
+<p>アプリから表示してみるためのテスト用スライドを用意します。</p>
+<ul>
+<li><a href="https://docs.google.com/presentation/u/0/?tgif=d" target="_blank">Google Slides</a> にアクセスし、新規スライドを作成する</li>
+</ul>
+<aside class="special"><p> ブラウザから <a href="https://slides.new/" target="_blank">slides.new</a> にアクセスすることでも新しいスライドを作成できます</p>
+</aside>
+<ul>
 <li>作成したスライドに新しいページを何枚か追加し、適当な内容を記載する</li>
 </ul>
 <h2 is-upgraded>サービスアカウントにテスト用スライドへの閲覧権限を付与</h2>
+<ul>
+<li>画面右上の <code>Share</code>（<code>共有</code>）ボタンをクリック</li>
+<li>入力欄に、先ほど作成したサービスアカウントのメールアドレス（<code>glass-slides-app@<ProjectID>.iam.gserviceaccount.com</code>）を入力して、<code>Viewer</code>（<code>閲覧者</code>）を選択してから <code>Send</code>（<code>送信</code>）をクリックする</li>
+</ul>
+<p>以上でクラウド側の準備は完了です。</p>
 
 
       </google-codelab-step>
     
-      <google-codelab-step label="アプリ実装(1)" duration="0">
-        <h2 is-upgraded>ベースとなるサンプルアプリの Clone</h2>
-<pre><code language="language-bash" class="language-bash">git clone 
+      <google-codelab-step label="アプリ実装(1) Android Project の準備" duration="0">
+        <p>クラウドサービスの準備ができたので、いよいよアプリ側の実装を進めていきます。</p>
+<h2 is-upgraded>ベースとなるプロジェクトの準備</h2>
+<p>今回は、公式の Glass 用サンプルアプリ集にある <code>CardSample</code> というアプリをベースに実装を行います。 リポジトリをクローンし、Android Studio で開いてみましょう。</p>
+<ul>
+<li>以下のコマンドで Git リポジトリをローカルに Clone する</li>
+</ul>
+<pre><code language="language-bash" class="language-bash">git clone https://github.com/googlesamples/glass-enterprise-samples.git
 </code></pre>
+<ul>
+<li>Android Studio で File -&gt; Open をクリックし、 <code>glass-enterprise-samples/CardSample</code> を選択して開く</li>
+</ul>
+<h2 is-upgraded>CardSample アプリの構成確認</h2>
+<p><code>CardSample</code> アプリでは、<code>MainActivity</code> 上にテキストを表示する <code>Fragment</code> を複数追加し、左右スワイプで</p>
+<p class="image-container"><img alt="CardSampleのアーキテクチャ" src="img/7d5b6cd37b779256.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="アプリ実装(2) ライブラリや設定の追加" duration="0">
+        <p>引き続き、<code>CardSample</code> Project に対して、必要なライブラリや設定を追加していきます。</p>
 <h2 is-upgraded>Google API Client ライブラリの追加</h2>
-<p>Android Studio のビルドツールである Gradle の設定ファイル（build.gradle）に、Slides API 用ライブラリと認証用ライブラリを依存関係として追記する</p>
+<p>Android Studio のビルドツールである Gradle の設定ファイル（build.gradle）に、Slides API 用ライブラリと認証用ライブラリを依存関係として追記します。</p>
 <ul>
 <li>CardSample/app/build.gradle に以下の2行を追記する</li>
 </ul>
@@ -117,15 +165,42 @@
 <ul>
 <li>Android Studio の右ペイン上部に以下のような警告が出てくるので、&#34;Sync Now&#34; をクリックして、変更を反映する <img alt="Gradle の警告" src="img/f1e40744cd679220.png"></li>
 </ul>
-<p>Google API Client ライブラリについて</p>
+<aside class="special"><h3 is-upgraded>Google API Client ライブラリとは</h3>
+<p>Google API は REST API として提供されているので、当然生の HTTP Request を送って操作することも可能ではありますが、受け取るレスポンスの型定義をはじめ、実装に少し手間がかかります。 Google API Client ライブラリでは、使いやすい Google API Client ライブラリは、Java だけではなく Python, .NET, JavaScript, Go, PHP 等、様々な言語向けに提供されています。 https://developers.google.com/api-client-library?hl=ja</p>
+</aside>
+<h2 is-upgraded>インターネット接続の Permission 追加</h2>
+<p>Android からインターネットに接続する場合、Manifest の中で宣言する必要があります。元の <code>CardSample</code> アプリはインターネット接続を必要としないアプリでしたが、Slides API に接続するためには Permission を追加する必要があります。</p>
+<p>- <code>CardSample/app/src/main/AndroidManifest.xml</code> を開き、以下の1行を追記する</p>
+<pre><code language="language-XML" class="language-XML">&lt;manifest xmlns:android=&#34;http://schemas.android.com/apk/res/android&#34;
+    package=&#34;com.example.android.glass.cardsample&#34;&gt;
+
+  &lt;!-- 以下の1行を追加 --&gt;
+  &lt;uses-permission android:name=&#34;android.permission.INTERNET&#34;/&gt;
+
+  &lt;application
+      android:allowBackup=&#34;true&#34;
+      android:icon=&#34;@mipmap/ic_launcher&#34;
+      android:label=&#34;@string/app_name&#34;
+      android:roundIcon=&#34;@mipmap/ic_launcher&#34;
+      android:supportsRtl=&#34;true&#34;
+      android:theme=&#34;@style/AppTheme&#34;&gt;
+    ...
+  &lt;/application&gt;
+
+&lt;/manifest&gt;
+</code></pre>
 
 
       </google-codelab-step>
     
-      <google-codelab-step label="アプリ実装(2)" duration="0">
-        <h2 is-upgraded>スライド画像表示用の Fragment の作成</h2>
-<p>スライドの各ページを全画面で表示するための Fragment を作成し、Layout を設定する。</p>
-<h3 is-upgraded>Fragment の新規追加</h3>
+      <google-codelab-step label="アプリ実装(2) Fragment の実装" duration="0">
+        <p>続いて、スライドを表示するためのビューとなる Fragment と、そのレイアウト定義を作成していきます。 最終的には、作成した Fragment をスライドのページ数分生成し、<code>MainActivity</code> の上に表示し、左右スワイプで切り替えられるようにします。</p>
+<p>図で説明すると、もともとの <code>CardSample</code> は以下のような画面構成になっていました。 <code>MainActivity</code> 上の <code>ViewPager</code> で <code>MainLayoutFragment</code> という文字列を表示する Fragment を表示していました。</p>
+<p class="image-container"><img alt="CardSample のアーキテクチャ" src="img/7d5b6cd37b779256.png"></p>
+<p>これに手を加え、新たに <code>ImageFragment</code> という、スライドを表示するための <code>Fragment</code> を作成して差し替えることにします。差し替え後のイメージは以下のとおりです。</p>
+<p class="image-container"><img alt="開発するアプリのアーキテクチャ" src="img/66511a03d48af27.png"></p>
+<h2 is-upgraded>スライド画像表示用の Fragment の作成</h2>
+<p>スライドの各ページを全画面で表示するための Fragment を作成します。</p>
 <ul>
 <li>左ペインの Project Tree から、<code>CardSample/app/src/main/java/com.example.android.glass.cardsample/fragments</code> を右クリックし、New → Fragment → Fragment (Blank) をクリックする <img alt="Fragment の新規作成" src="img/d63a829c2a75b391.png"></li>
 <li>以下のとおり入力して Finish をクリック <ul>
@@ -135,8 +210,8 @@
 </ul>
 </li>
 </ul>
-<h3 is-upgraded>Layout の編集</h3>
-<p>Fragment のレイアウトに ImageView を配置する。</p>
+<h3 is-upgraded>Fragment の画面 Layout の編集</h3>
+<p>Fragment のレイアウトに ImageView を配置します。</p>
 <ul>
 <li>先ほどの ImageLayoutFragment 作成に伴って作成された <code>CardSample/app/src/main/res/res/layout/image_layout.xml</code> をダブルクリックして開く</li>
 <li>右ペイン上部のメニューから <code>Design</code> → <code>Code</code> に切り替える</li>
@@ -158,8 +233,138 @@
         android:layout_height=&#34;360dp&#34; /&gt;
 &lt;/FrameLayout&gt;
 </code></pre>
-<p>（補足）Activity / Fragment / View のイメージ</p>
-<h2 is-upgraded>Slides API からデータを取得する非同期処理の実装</h2>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="アプリ実装(3) サービスアカウントによる認証処理の実装" duration="0">
+        <p>サービスアカウントの JSON 形式のキーファイルをソースコードに追加し、アプリケーション内で読み込んで認証クレデンシャルとして使用できるようにします。</p>
+<h2 is-upgraded>キーファイルを Asset としてソースコードに追加</h2>
+<p>まずは、キーの JSON ファイルを Assets としてソースコードに追加します。</p>
+<ul>
+<li>Android Studio 左ペインの Project ツリーから、<code>CardSample/app/src/main</code> を右クリックし、New -&gt; Folder -&gt; Assets をクリックする</li>
+<li>表示されたダイアログで <code>Finish</code> をクリックすると、<code>main</code> 配下に <code>Assets</code> フォルダが作成される</li>
+<li>Cloud Console からダウンロードしたサービスアカウントのキーファイルを、作成した <code>Assets</code> フォルダにドラッグアンドドロップする</li>
+</ul>
+<h2 is-upgraded>キーファイルを読み込む処理の実装</h2>
+<ul>
+<li><code>MainActivity</code> をダブルクリックして開く</li>
+<li>キーファイルを読み込んで <code>com.google.auth.oauth2.GoogleCredentials</code> として返す <code>loadServiceAccountCredential()</code> メソッドを以下のように実装する（キーファイルのファイル名は適宜書き換える）</li>
+</ul>
+<pre><code language="language-Java" class="language-Java">...
+import com.google.api.services.slides.v1.SlidesScopes;
+import com.google.auth.oauth2.GoogleCredentials;
+import android.content.res.AssetManager;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+...
+
+public class MainActivity extends BaseActivity {
+    private final String SERVICE_ACCOUNT_FILENAME = &#34;{キーファイルのファイル名(e.g. foo.json)}&gt;&#34;;
+
+    ...
+
+    private GoogleCredentials loadServiceAccountCredential() throws IOException {
+        Collection&lt;String&gt; scopes = new ArrayList&lt;String&gt;();
+        scopes.add(SlidesScopes.PRESENTATIONS_READONLY);
+        AssetManager assetManager = getAssets();
+        InputStream inputStream = assetManager.open(SERVICE_ACCOUNT_FILENAME);
+        GoogleCredentials credentials = GoogleCredentials.fromStream(inputStream);
+        return credentials;
+    }
+}
+</code></pre>
+<aside class="special"><p><code>android.content.res.AssetManager</code> を利用することで、Assets フォルダ内のファイルをソースコードから簡単に読み込むことができます</p>
+</aside>
+<aside class="special"><p> Google API の認証においては、利用したい API の種類を <code>Scope</code> として必ず指定する必要があります。今回はスライドの読み取りのみを行いたいので、Slides API Client に含まれる <code>SlidesScopes.PRESENTATIONS_READONLY</code> という定数を <code>Scope</code> に追加しています。この定数の実際の値は <code>https://www.googleapis.com/auth/presentations.readonly</code> というもので、もちろんこの文字列を直接 <code>Scope</code> として追加しても問題ありません。</p>
+<p>参考）<a href="https://developers.google.com/identity/protocols/oauth2/scopes" target="_blank">Google API の Scope 一覧</a></p>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="アプリ実装(4) API からデータを取得する非同期処理の実装" duration="0">
+        <p>Google API Client を使い、Slides API からデータを取得するための処理を記述していきます。 Android アプリでは、HTTP 通信等の時間のかかる処理は、メインスレッド（UI スレッド）ではなく、ワーカースレッドで非同期に実行する必要があります。 今回は、非同期処理を実装する方法として <code>AsyncTask</code> を継承したクラスを作成していきます。</p>
+<aside class="warning"><p><code>AsyncTask</code> クラスは、Android 11（API Level 30）で <code>非推奨（Deprecated）</code> 扱いとなりました。今後は代わりの方法として、Kotlin Coroutine などを利用することが推奨されます。本コースでは、Glass の OS が Android 8.1（API Level 27）であることを踏まえて <code>AsyncTask</code> を利用しています。</p>
+</aside>
+<h2 is-upgraded>AsyncTask の</h2>
+<p>AsyncTask を継承するクラスのインスタンスを作成して <code>execute()</code> メソッドを実行すると、<code>doInBackground()</code> メソッドに記述した処理が開始されます。 その後、非同期処理が完了すると、<code>onPostExecute()</code> に記述した処理が実行されます。</p>
+<p>今回の場合、<code>doInBackground()</code> において、<code>Slides API</code> からスライドの各ページの画像を取得する処理を行います。 また、完了後には AsyncTask を呼び出す Activity 側で、取得した画像を使って Fragment を生成する処理を行います。</p>
+<p>従って、Slides API にアクセスする <code>SlidesApiTask</code> クラスは以下のようなコードになります。</p>
+<pre><code language="language-Java" class="language-Java">public class SlidesApiTask extends AsyncTask&lt;Void, Void, List&lt;Bitmap&gt;&gt; {
+    @Override
+    protected List&lt;Bitmap&gt; doInBackground(Void... args) {
+        // スライドの各ページを取得する処理
+    }
+
+    @Override
+    protected void onPostExecute(List&lt;Bitmap&gt; result) {
+        // API からのページ取得完了後にやりたい処理
+    }
+}
+</code></pre>
+<p>今回、API からのページ取得完了後には、取得したページの画像を配置した Fragment を生成して<code>MainActivity</code> のメンバ変数に格納するなど、<code>MainActivity</code> に関連した処理を行う必要があります。 これを実現するために、<code>Listener</code> という interface を定義し、<code>SlidesApiTask</code> のコンストラクタで <code>Listener</code> を渡し、処理完了後の <code>onPostExecute()</code> において <code>Listener#onSuccess</code> を呼び出すようにします。</p>
+<pre><code language="language-Java" class="language-Java">public class SlidesApiTask extends AsyncTask&lt;Void, Void, List&lt;Bitmap&gt;&gt; {
+    private Listener listener;
+
+    @Override
+    protected List&lt;Bitmap&gt; doInBackground(Void... args) {
+        // スライドの各ページを取得する処理
+    }
+
+    @Override
+    protected void onPostExecute(List&lt;Bitmap&gt; result) {
+        if (listener != null) {
+            listener.onSuccess(result);
+        }
+    }
+
+    void setListener(Listener listener) {
+        this.listener = listener;
+    }
+
+    interface Listener {
+        void onSuccess(List&lt;Bitmap&gt; result);
+    }
+}
+</code></pre>
+<p><code>MainActivity</code> から <code>SlideApiTask</code> を呼び出す場合には、完了時に行いたい処理を記述した <code>Listener</code> を作成し、<code>SlideApiTask</code> のコンストラクタに渡します。</p>
+<pre><code language="language-Java" class="language-Java">public class MainActivity extends BaseActivity {
+    ...
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        try {
+            SlidesApiTask.Listener listener = createSlidesApiTaskListener();
+            slidesApiTask = new SlidesApiTask(listener);
+            slidesApiTask.execute();
+        } catch (GeneralSecurityException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    ...
+
+    private SlidesApiTask.Listener createSlidesApiTaskListener() throws GeneralSecurityException, IOException {
+        return new SlidesApiTask.Listener() {
+            @Override
+            public void onSuccess(List&lt;Bitmap&gt; thumbnails) {
+                // MainActivity 側でやりたいこと
+                // （あとで実装します）
+            }
+        };
+    }
+</code></pre>
+<h2 is-upgraded>Slides API Client ライブラリの使い方</h2>
+<p>TODO: 余裕あれば</p>
+<h2 is-upgraded>SlidesApiTask の実装</h2>
+<p><code>SlidesApiTask</code> に、実際のデータ取得処理を実装していきます。 最終的な実装は以下のようになります。</p>
 <pre><code language="language-Java" class="language-Java">package com.example.android.glass.cardsample;
 
 import android.graphics.Bitmap;
@@ -264,9 +469,67 @@ public class SlidesApiTask extends AsyncTask&lt;Void, Void, List&lt;Bitmap&gt;&g
         return thumbnailUrls;
     }
 }
-
 </code></pre>
-<h2 is-upgraded>MainActivity の実装</h2>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="アプリ実装(5) MainActivity の残りの実装" duration="0">
+        <h2 is-upgraded><code>SlideApiTask</code> に渡す <code>Listener</code> の実装</h2>
+<p><code>createSlidesApiTaskListener()</code> に、非同期データ取得完了時の処理を記述していきます。 <code>MainActivity</code> クラスの <code>fragments</code> 変数に、取得したページ画像を載せた <code>ImageLayoutFragment</code> を格納していきます。</p>
+<pre><code language="language-Java" class="language-Java">public class MainActivity extends BaseActivity {
+    private List&lt;BaseFragment&gt; fragments = new ArrayList&lt;&gt;();
+
+    ...
+
+    private SlidesApiTask.Listener createSlidesApiTaskListener() throws GeneralSecurityException, IOException {
+        return new SlidesApiTask.Listener() {
+            @Override
+            public void onSuccess(List&lt;Bitmap&gt; thumbnails) {
+                setContentView(R.layout.view_pager_layout);
+
+                final ScreenSlidePagerAdapter screenSlidePagerAdapter = new ScreenSlidePagerAdapter(
+                        getSupportFragmentManager());
+                viewPager = findViewById(R.id.viewPager);
+                viewPager.setAdapter(screenSlidePagerAdapter);
+
+                for(int i = 0; i &lt; thumbnails.size(); i++) {
+                    fragments.add(ImageLayoutFragment
+                            .newInstance(thumbnails.get(i)));
+                }
+
+                screenSlidePagerAdapter.notifyDataSetChanged();
+
+                final TabLayout tabLayout = findViewById(R.id.page_indicator);
+                tabLayout.setupWithViewPager(viewPager, true);
+            }
+        };
+    }
+}
+</code></pre>
+<h2 is-upgraded><code>OnCreate()</code> から <code>SlidesApiTask</code> を実行</h2>
+<ul>
+<li>スライド</li>
+</ul>
+<pre><code language="language-Java" class="language-Java">public class MainActivity extends BaseActivity {
+    ...
+    private SlidesApiTask slidesApiTask;
+    private final String PRESENTATION_ID = &#34;...&#34;;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        GoogleCredentials credentials = loadServiceAccountCredential();
+        SlidesApiTask.Listener listener = createSlidesApiTaskListener();
+        slidesApiTask = new SlidesApiTask(listener, PRESENTATION_ID, credentials);
+        slidesApiTask.execute();
+    }
+
+    ...
+}
+</code></pre>
+<p>最終形の <code>MainActivity</code> は以下のようになります。</p>
 <pre><code language="language-Java" class="language-Java">/*
  * Copyright 2019 Google LLC
  *
