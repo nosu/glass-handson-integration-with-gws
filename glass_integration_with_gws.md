@@ -925,6 +925,9 @@ public class MainActivity extends BaseActivity {
 ```
 
 - Android Studio の `▶` ボタンをクリックして実行してみる
+- 以下のように、スライドが表示されれば成功です
+
+![プロジェクト選択](img/app_capture.gif)
 
 > aside negative
 > ビルド時に `More than one file was found with OS independent path 'META-INF/DEPENDENCIES'` というエラーが出た場合、`CardSample/app/build.gradle` を開き、以下を追記して Sync を行ってから再度ビルドしてください。
@@ -941,4 +944,5 @@ android {
 ```
 
 
-おつかれさまでした！以上でこのコースは終了です！！
+
+**おつかれさまでした！以上でこのコースは終了です！！ 🎉🎉🎉**
