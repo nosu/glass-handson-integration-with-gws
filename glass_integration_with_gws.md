@@ -1,10 +1,10 @@
 id: glass_integration_with_gws
-status: [draft]
+status: [published]
 author: Wataru Inoue
 summary: Google Workspace と連携したアプリの開発
 categories: Android, Glass
 tags: android, googleglass, gws, workspace
-feedback link: TBE
+feedback link: https://github.com/nosu/glass-handson-integration-with-gws/issues
 
 Google Workspace と連携したアプリの開発
 ==================================
@@ -189,11 +189,10 @@ dependencies {
     implementation 'com.google.auth:google-auth-library-oauth2-http:1.2.0'
     implementation 'com.github.bumptech.glide:glide:4.12.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
-
 }
 ```
 
-- Android Studio の右ペイン上部に以下のような警告が出てくるので、”Sync Now” をクリックして、変更を反映する
+- Android Studio の右ペイン上部に以下のような警告が出てくるので、”Sync Now” をクリックして、Android Studio 全体に変更を反映する
 ![Gradle の警告](img/gradle_sync_now.png)
 
 
@@ -216,7 +215,7 @@ dependencies {
 
 ### インターネット接続の Permission 追加
 
-Android からインターネットに接続する場合、Manifest の中で宣言する必要があります。元の `CardSample` アプリはインターネット接続を必要としないアプリでしたが、Slides API に接続するためには Permission を追加する必要があります。
+Android からインターネットに接続する場合、マニフェストの中で宣言する必要があります。元の `CardSample` アプリはインターネット接続を必要としないアプリでしたが、Slides API に接続するためには Permission を追加する必要があります。
 
 - `CardSample/app/src/main/AndroidManifest.xml` を開き、以下の1行を追記する
 ```XML
@@ -243,8 +242,7 @@ Android からインターネットに接続する場合、Manifest の中で宣
 アプリ実装(3) Fragment の実装
 ---------------------------
 
-続いて、スライドを表示するためのビューとなる Fragment と、そのレイアウト定義を作成していきます。
-最終的には、作成した Fragment をスライドのページ数分生成し、`MainActivity` の上に表示し、左右スワイプで切り替えられるようにします。
+続いて、スライドを表示するためのビューとなる `Fragment` と、そのレイアウト定義を作成していきます。
 
 図で説明すると、もともとの `CardSample` は以下のような画面構成になっていました。
 `MainActivity` 上の `ViewPager` で `MainLayoutFragment` という文字列を表示する Fragment を表示していました。
@@ -260,12 +258,16 @@ Android からインターネットに接続する場合、Manifest の中で宣
 
 スライドの各ページを全画面で表示するための Fragment を作成します。
 
-- 左ペインの Project Tree から、`CardSample/app/src/main/java/com.example.android.glass.cardsample/fragments` を右クリックし、New → Fragment → Fragment (Blank) をクリックする
+- 左ペインの Project Tree から、`CardSample/app/src/main/java/com.example.android.glass.cardsample/fragments` を右クリックし、`New` → `Fragment` → `Fragment (Blank)` をクリックする
 ![Fragment の新規作成](img/create_new_fragment.png)
-- 以下のとおり入力して Finish をクリック
-  - Fragment Name: `ImageLayoutFragment`
-  - Fragment Layout Name: `image_layout`
-  - Source Language: `Java`
+- 以下のとおり入力して `Finish` をクリック
+
+| 入力項目 | 入力値 |
+|---|---|
+| Fragment Name | `ImageLayoutFragment` |
+| Fragment Layout Name | `image_layout` |
+| Source Language | `Java` |
+
 - `Add Files to Git` というダイアログが表示された場合、そのまま `Add` をクリックして、作成したファイルを Git 管理下に追加する
 
 
@@ -273,8 +275,8 @@ Android からインターネットに接続する場合、Manifest の中で宣
 
 Fragment のレイアウトに ImageView を配置します。
 
-- 先ほどの ImageLayoutFragment 作成に伴って作成された `CardSample/app/src/main/res/layout/image_layout.xml` をダブルクリックして開く
-- 右ペイン上部のメニューから `Design` → `Code` に切り替える
+- 先ほどの `ImageLayoutFragment` 作成に伴って作成された `CardSample/app/src/main/res/layout/image_layout.xml` をダブルクリックして開く
+- 右ペイン上部のメニューから `Design` から `Code` に切り替える
 - XML から `TextView` のタグを削除し、代わりに以下のような `ImageView` を追加する
 ```XML
 <FrameLayout ...>
@@ -297,9 +299,11 @@ Fragment のレイアウトに ImageView を配置します。
 
 ### ImageLayoutFragment クラスの実装
 
-`ImageLayoutFragment` クラスを編集し、インスタンスを作成する際に画像の URL を受け取って、先ほどのレイアウトに配置した `ImageView` に表示されるようにします。
+`ImageLayoutFragment` クラスを編集し、インスタンスを生成する際に画像の URL を受け取って、先ほどのレイアウトに配置した `ImageView` にその URL からダウンロードした画像が表示されるようにします。
 
-`Fragment` は、アプリの実行状態によっていつ破棄されて、いつ再生成されるかわからないので、再生成に必要な値は `Bundle` として保存しておき、それをもとに `onCreateView` メソッドで（再）生成処理が行えるようにする必要があります。今回の `ImageLayoutFragment` の場合、実装は以下のようなイメージになります。
+`Fragment` は、アプリの実行状態によっていつ破棄されて、いつ再生成されるかわからないので、再生成に必要な値は `Bundle` として保存しておき、それをもとに `onCreateView` メソッドで（再）生成処理が行えるようにする必要があります。
+
+今回の `ImageLayoutFragment` の場合、実装は以下のようなイメージになります。
 
 ```Java
 public class ImageLayoutFragment extends BaseFragment {
@@ -309,8 +313,7 @@ public class ImageLayoutFragment extends BaseFragment {
 
   @Nullable
   @Override
-  public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-      @Nullable Bundle savedInstanceState) {
+  public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
     // Bundle の値を元に、Fragment を生成する処理
     // （今回の場合：URL から画像を取得し、slideImageView にセットする処理）
   }
@@ -354,32 +357,39 @@ public class ImageLayoutFragment extends BaseFragment {
     String imageUrl = getArguments().getString("imageUrl");
 
     Glide.with(this)
-            .load(imageUrl)
-            .into(imageView);
+        .load(imageUrl)
+        .into(imageView);
 
     return view;
   }
 }
 ```
 
+> aside positive
+> #### Glide を使用した画像のダウンロード
+> Glide を使用すると、URL から画像をダウンロードする非同期処理を、非常にシンプルな記述で実装することができます。
+> ここでは、`imageUrl` からダウンロードした画像を、`imageView` にセットする処理を行っています。
 
 
 アプリ実装(4) サービスアカウントによる認証処理の実装
 ------------------------------------------
 
-サービスアカウントの JSON 形式のキーファイルをソースコードに追加し、アプリケーション内で読み込んで認証クレデンシャルとして使用できるようにします。
+続いて、`Slides API` へのアクセスを行うための準備として、サービスアカウントによる認証処理を実装します。
+具体的には、サービスアカウントの JSON 形式のキーファイルをソースコードに追加し、アプリケーション内で読み込んで認証クレデンシャルとして使用できるようにします。
 
 ### キーファイルを Asset としてソースコードに追加
 
 まずは、キーの JSON ファイルを Assets としてソースコードに追加します。
 
-- Android Studio 左ペインの Project ツリーから、`CardSample/app/src/main` を右クリックし、New → Folder → Assets をクリックする
+- Android Studio 左ペインの Project ツリーから、`CardSample/app/src/main` を右クリックし、`New` → `Folder` → `Assets` をクリックする
 - 表示されたダイアログで `Finish` をクリックすると、`main` 配下に `Assets` フォルダが作成される
 - Cloud Console からダウンロードしたサービスアカウントのキーファイルを、作成した `Assets` フォルダにドラッグアンドドロップする
 - `Move` というダイアログが表示されたら、入力内容はそのままで `Refactor` ボタンをクリックする
 - `Add Files to Git` というダイアログが表示された場合、`Cancel` をクリックして、Git 管理化にファイルを追加しないようにする
 
 ### キーファイルを読み込む処理の実装
+
+認証クレデンシャルは、のちのち `MainActivity` から Slides API を呼び出す際に使用するため、`MainActivity` 上にキーファイルを読み込む処理を実装していきます。
 
 - `MainActivity` をダブルクリックして開く
 - キーファイルを読み込んで `com.google.auth.oauth2.GoogleCredentials` として返す `loadServiceAccountCredential()` メソッドを以下のように実装する（キーファイルのファイル名は適宜書き換える）
@@ -577,14 +587,17 @@ for(int i = 0; i < pages.size(); ++i){
 }
 ```
 
-（参考）[`presentations.pages.getThumbnail` メソッドの詳細](https://developers.google.com/slides/api/reference/rest/v1/presentations.pages/getThumbnail)
+> aside positive
+> #### Slides API から取得するサムネイルのサイズ
+> Slides API から取得するサムネイル画像はサイズを指定することができるようになっています。ここでは、`MEDIUM` を指定して横幅 800px のサムネイルを取得しています。
+> 
+> （参考）[`presentations.pages.getThumbnail` メソッドの詳細](https://developers.google.com/slides/api/reference/rest/v1/presentations.pages/getThumbnail)
 
 
 
 ### SlidesApiTask の実装
 
-`SlidesApiTask` に、実際のデータ取得処理を実装していきます。
-最終的な実装は以下のようになります。
+ここまでの内容を踏まえ、`SlidesApiTask` の最終的な実装は以下のようになります。
 
 ```Java
 package com.example.android.glass.cardsample;
@@ -668,11 +681,56 @@ public class SlidesApiTask extends AsyncTask<Void, Void, List<String>> {
 
 ## アプリ実装(6) MainActivity の残りの実装
 
+ここまでの作業で、Slides API からスライド画像を取得する処理や、スライド画像を表示するためのビューの実装は完了しました。
 
-### `SlideApiTask` に渡す `Listener` の実装
+あとは、`MainActivity` にそれらを利用するためのコードを追加していきます。
 
-`createSlidesApiTaskListener()` に、非同期データ取得完了時の処理を記述していきます。
-`MainActivity` クラスの `fragments` 変数に、取得したページ画像を載せた `ImageLayoutFragment` を格納していきます。
+
+### 不要な記述の削除
+
+まずは、`MainActivity#onCreate` で行っている画面のセットアップ処理を一旦まるごと削除します。
+
+```Java
+public class MainActivity extends BaseActivity {
+    ...
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.view_pager_layout);
+
+        // ここから下を削除
+        final ScreenSlidePagerAdapter screenSlidePagerAdapter = new ScreenSlidePagerAdapter(
+            getSupportFragmentManager());
+        viewPager = findViewById(R.id.viewPager);
+        viewPager.setAdapter(screenSlidePagerAdapter);
+
+        fragments.add(MainLayoutFragment
+            .newInstance(getString(R.string.text_sample), getString(R.string.footnote_sample),
+                getString(R.string.timestamp_sample), null));
+        fragments.add(MainLayoutFragment
+            .newInstance(getString(R.string.different_options), getString(R.string.empty_string),
+                getString(R.string.empty_string), R.menu.main_menu));
+        fragments.add(ColumnLayoutFragment
+            .newInstance(R.drawable.ic_style, getString(R.string.columns_sample),
+                getString(R.string.footnote_sample), getString(R.string.timestamp_sample)));
+        fragments.add(MainLayoutFragment
+            .newInstance(getString(R.string.like_this_sample), getString(R.string.empty_string),
+                getString(R.string.empty_string), null));
+
+        screenSlidePagerAdapter.notifyDataSetChanged();
+
+        final TabLayout tabLayout = findViewById(R.id.page_indicator);
+        tabLayout.setupWithViewPager(viewPager, true);
+        // ここから上を削除
+    }
+    ...
+}
+```
+
+### `SlideApiTask` 完了時に呼び出してもらう `Listener` の実装
+
+次に、`SlideApiTask` で画像 URL 取得が完了した際に呼び出してもらう `Listener` を作成するメソッドを `createSlidesApiTaskListener` として実装していきます。
+`createSlidesApiTaskListener` の `onSuccess` の中では、先ほど `onCreate` から削除したコードと似たような流れで、`fragments` 変数に、取得したページ画像を載せた `ImageLayoutFragment` を格納する処理を記述していきます。
 
 - `MainActivity` をダブルクリックして開く
 - import 文と、`createSlidesApiTaskListener` を以下のように実装する
@@ -719,7 +777,8 @@ public class MainActivity extends BaseActivity {
 
 ### Activity 生成時に `SlidesApiTask` を実行開始する
 
-`MainActivity` 生成時に呼ばれる `onCreate` の中で、作成した `SlidesApiTask` を実行開始します。`SlidesApiTask` には、完了時に実行したい `ImageLayoutFragment` 生成処理を `listener` として渡しておきます。
+`MainActivity` 生成時に呼ばれる `onCreate` の中で、作成した `SlidesApiTask` を実行開始します。
+`SlidesApiTask` には、先ほど実装した `createSlidesApiTaskListener` で作成した `listener` を渡しておきます。
 
 ```Java
 public class MainActivity extends BaseActivity {
@@ -750,6 +809,7 @@ public class MainActivity extends BaseActivity {
 }
 ```
 
+以上で `MainActivity` の実装は完了です。
 最終形の `MainActivity` は以下のようになります。
 
 ```Java
@@ -879,3 +939,6 @@ android {
 	…
 }
 ```
+
+
+おつかれさまでした！以上でこのコースは終了です！！
