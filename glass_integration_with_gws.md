@@ -73,8 +73,6 @@ Google Cloud / GWS 側の準備
 
 - Cloud Console ([https://console.cloud.google.com](https://console.cloud.google.com)) にアクセスする
 - ヘッダにあるプロジェクト名（ここでは `glass-handson`）をクリックし、表示されたダイアログから「新しいプロジェクト」を選択
-![ヘッダ](img/console_header.png)
-<!-- ![プロジェクト選択](img/select_project.png) -->
 - 適当なプロジェクト名を入力し、「作成」をクリック
 ![プロジェクト選択](img/create_new_project.png)
 - 作成完了の通知が表示されたら、通知ポップアップから作成したプロジェクトに切り替える
@@ -89,6 +87,7 @@ Google Cloud では、意図しない API の利用を防ぐために、デフ�
 
 - Console 画面上部にある検索窓に、”slides api” などと入力し、表示された候補から「Google Slides API」を選択する
 - 「有効にする」をクリックしてしばらく待つ
+![プロジェクト選択](img/enable_slides_api.png)
 
 ### サービスアカウントの作成と権限の付与
 
