@@ -408,15 +408,15 @@ public class MainActivity extends BaseActivity {
 <p><code>AsyncTask</code> を継承するクラスのインスタンスを作成して <code>execute()</code> メソッドを実行すると、<code>doInBackground()</code> メソッドに記述した処理が開始されます。 その後、非同期処理が完了すると、<code>onPostExecute()</code> に記述した処理が実行されます。</p>
 <p>今回の場合、<code>doInBackground()</code> において、<code>Slides API</code> からスライドの各ページの画像をダウンロードするための URL を取得する処理を行います。</p>
 <p><code>Slides API</code> にアクセスする <code>SlidesApiTask</code> クラスは以下のようなコードになります。</p>
-<pre><code language="language-Java" class="language-Java">public class SlidesApiTask extends AsyncTask&lt;Void, Void, List&lt;Bitmap&gt;&gt; {
+<pre><code language="language-Java" class="language-Java">public class SlidesApiTask extends AsyncTask&lt;Void, Void, List&lt;String&gt;&gt; {
     @Override
-    protected List&lt;Bitmap&gt; doInBackground(Void... args) {
-        // スライドの各ページを取得する処理
+    protected List&lt;String&gt; doInBackground(Void... args) {
+        // スライドの各ページ URL を取得する処理
     }
 
     @Override
-    protected void onPostExecute(List&lt;Bitmap&gt; result) {
-        // API からのページ取得完了後にやりたい処理
+    protected void onPostExecute(List&lt;String&gt; result) {
+        // API からのページ URL 取得完了後にやりたい処理
     }
 }
 </code></pre>
@@ -478,7 +478,7 @@ public class MainActivity extends BaseActivity {
     private SlidesApiTask.Listener createSlidesApiTaskListener() throws GeneralSecurityException, IOException {
         return new SlidesApiTask.Listener() {
             @Override
-            public void onSuccess(List&lt;Bitmap&gt; thumbnails) {
+            public void onSuccess(List&lt;String&gt; thumbnailUrls) {
                 // MainActivity 側でやりたいこと
                 // （あとで実装します）
             }

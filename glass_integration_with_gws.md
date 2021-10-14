@@ -455,15 +455,15 @@ Android アプリでは、HTTP 通信等の時間のかかる処理は、メイ�
 `Slides API` にアクセスする `SlidesApiTask` クラスは以下のようなコードになります。
 
 ```Java
-public class SlidesApiTask extends AsyncTask<Void, Void, List<Bitmap>> {
+public class SlidesApiTask extends AsyncTask<Void, Void, List<String>> {
     @Override
-    protected List<Bitmap> doInBackground(Void... args) {
-        // スライドの各ページを取得する処理
+    protected List<String> doInBackground(Void... args) {
+        // スライドの各ページ URL を取得する処理
     }
 
     @Override
-    protected void onPostExecute(List<Bitmap> result) {
-        // API からのページ取得完了後にやりたい処理
+    protected void onPostExecute(List<String> result) {
+        // API からのページ URL 取得完了後にやりたい処理
     }
 }
 ```
@@ -537,7 +537,7 @@ public class MainActivity extends BaseActivity {
     private SlidesApiTask.Listener createSlidesApiTaskListener() throws GeneralSecurityException, IOException {
         return new SlidesApiTask.Listener() {
             @Override
-            public void onSuccess(List<Bitmap> thumbnails) {
+            public void onSuccess(List<String> thumbnailUrls) {
                 // MainActivity 側でやりたいこと
                 // （あとで実装します）
             }
