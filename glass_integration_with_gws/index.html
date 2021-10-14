@@ -222,6 +222,18 @@
 
 &lt;/manifest&gt;
 </code></pre>
+<h2 is-upgraded>import 文自動追加の設定</h2>
+<p>Android Project でライブラリ等を利用する場合、そのライブラリの名前空間を宣言する <code>import</code> 文を記述する必要があります。 もし <code>import</code> 文を書き忘れている場合、追加するようサジェストはしてくれるのですが、一つずつ対応していくのは少々面倒です。</p>
+<p>Android Studio の <code>Auto Import</code> の機能を有効にすると、その面倒な <code>import</code> 文の追加作業を自動でやってくれて便利なので、この機能を有効にしましょう。</p>
+<ul>
+<li>Android Studio のメニューから <code>Files</code> → <code>Settings</code>（Mac の場合は <code>Android Studio</code> →  <code>Preferences</code>）を開く</li>
+<li><code>Editor</code> → <code>General</code> → <code>Auto Import</code> を開く</li>
+<li><code>Java</code> の以下のオプションを有効にする <ul>
+<li><code>Add unambiguous imports on the fly</code></li>
+<li><code>Optimaize imports on the fly</code><img alt="Auto Import" src="img/bb88c324a3ed2702.png"></li>
+</ul>
+</li>
+</ul>
 
 
       </google-codelab-step>

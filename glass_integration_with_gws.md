@@ -238,6 +238,21 @@ Android からインターネットに接続する場合、マニフェストの
 ```
 
 
+### import 文自動追加の設定
+
+Android Project でライブラリ等を利用する場合、そのライブラリの名前空間を宣言する `import` 文を記述する必要があります。
+もし `import` 文を書き忘れている場合、追加するようサジェストはしてくれるのですが、一つずつ対応していくのは少々面倒です。
+
+Android Studio の `Auto Import` の機能を有効にすると、その面倒な `import` 文の追加作業を自動でやってくれて便利なので、この機能を有効にしましょう。
+
+- Android Studio のメニューから `Files` → `Settings`（Mac の場合は `Android Studio` →  `Preferences`）を開く
+- `Editor` → `General` → `Auto Import` を開く
+- `Java` の以下のオプションを有効にする
+  - `Add unambiguous imports on the fly`
+  - `Optimaize imports on the fly`
+![Auto Import](img/auto_import.png)
+
+
 アプリ実装(3) Fragment の実装
 ---------------------------
 
